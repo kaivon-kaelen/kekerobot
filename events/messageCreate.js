@@ -59,6 +59,11 @@ module.exports = {
           .setLabel('Confirmer et envoyer')
           .setStyle(ButtonStyle.Primary)
           .setEmoji('📩'),
+        new ButtonBuilder()
+          .setCustomId(`modmail_cancel_${message.author.id}`)
+          .setLabel('Annuler')
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('❌'),
       );
 
       await message.reply({
@@ -80,15 +85,7 @@ module.exports = {
       if (!ticket || !ticket.open) return;
       const user = await message.client.users.fetch(ticket.userId).catch(() => null);
       if (!user) return;
-      const sent = await user.send({
-        embeds: [
-          new EmbedBuilder()
-            .setAuthor({ name: `Modération — ${message.author.tag}`, iconURL: message.author.displayAvatarURL() })
-            .setDescription(buildContent(message))
-            .setColor(0xfee75c)
-            .setTimestamp(),
-        ],
-      }).catch(() => null);
+      const sent = await user.send(buildContent(message)).catch(() => null);
       if (sent) {
         // stocker mapping pour réactions (message thread -> message DM)
         addMapping(sent.id, message.id, message.channel.id, ticket.userId);

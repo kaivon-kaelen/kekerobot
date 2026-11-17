@@ -8,6 +8,27 @@ const FORUM_ID = process.env.MODMAIL_FORUM_CHANNEL_ID;
 module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction) {
+    // Bouton d'annulation modmail
+    if (interaction.isButton() && interaction.customId.startsWith('modmail_cancel_')) {
+      const userId = interaction.customId.replace('modmail_cancel_', '');
+      if (interaction.user.id !== userId) {
+        return interaction.reply({ content: 'Ce bouton ne vous est pas destiné.', ephemeral: true });
+      }
+      const p = pending.get(userId);
+      pending.delete(userId);
+      // Retirer la réaction ⏳ sur le message original
+      if (p) {
+        try {
+          const dmChannel = await interaction.client.channels.fetch(p.dmChannelId);
+          const originalMsg = await dmChannel.messages.fetch(p.messageId);
+          const reaction = originalMsg.reactions.cache.get('⏳');
+          if (reaction) await reaction.users.remove(interaction.client.user.id).catch(() => {});
+        } catch {}
+      }
+      await interaction.reply({ content: '❌ Envoi annulé.', ephemeral: true });
+      return;
+    }
+
     // Bouton de confirmation modmail
     if (interaction.isButton() && interaction.customId.startsWith('modmail_confirm_')) {
       const userId = interaction.customId.replace('modmail_confirm_', '');
