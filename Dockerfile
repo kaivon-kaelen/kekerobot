@@ -9,8 +9,7 @@ RUN npm ci --omit=dev
 # Copier le code source
 COPY . .
 
-# L'utilisateur non-root pour la sécurité
-RUN addgroup -S bot && adduser -S bot -G bot && chown -R bot:bot /app
-USER bot
+# Répertoire de données writable
+RUN mkdir -p /app/data && chmod 777 /app/data
 
 CMD ["node", "index.js"]
