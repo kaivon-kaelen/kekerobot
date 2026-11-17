@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { addCase } = require('../utils/cases');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -48,5 +49,15 @@ module.exports = {
       )
       .setTimestamp();
     await interaction.editReply({ embeds: [embed] });
+    await sendLog(interaction.client, modLogEmbed({
+      title: '🔨 Ban',
+      color: 0xed4245,
+      fields: [
+        { name: 'Utilisateur', value: `${target.tag} (${target.id})`, inline: true },
+        { name: 'Modérateur', value: interaction.user.tag, inline: true },
+        { name: 'Raison', value: reason },
+        { name: 'Case', value: `#${c.id}`, inline: true },
+      ],
+    }));
   },
 };

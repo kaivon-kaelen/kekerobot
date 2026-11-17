@@ -1,5 +1,6 @@
 const { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, ChannelType } = require('discord.js');
 const { getOpenByUser, createTicket } = require('../utils/modmail');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 const pending = require('../utils/modmail-pending');
 const { addMapping } = require('../utils/modmail-messages');
 
@@ -93,6 +94,15 @@ module.exports = {
       if (!thread) return interaction.editReply('Impossible de créer le ticket.');
 
       createTicket(userId, interaction.user.tag, thread.id);
+      await sendLog(interaction.client, modLogEmbed({
+        title: '📩 Nouveau modmail',
+        color: 0x5865f2,
+        fields: [
+          { name: 'Utilisateur', value: `${interaction.user.tag} (${userId})`, inline: true },
+          { name: 'Thread', value: `${thread.name} (${thread.id})`, inline: true },
+          { name: 'Raison', value: reason.slice(0, 1024) },
+        ],
+      }));
 
       // Récupérer le message initial du thread pour le mapping réactions
       let starterMsg = null;

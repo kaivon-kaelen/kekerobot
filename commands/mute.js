@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { addCase } = require('../utils/cases');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 const { parseDuration, formatDuration } = require('../utils/duration');
 
 module.exports = {
@@ -45,5 +46,16 @@ module.exports = {
         { name: 'Case', value: `#${c.id}`, inline: true },
       ).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
+    await sendLog(interaction.client, modLogEmbed({
+      title: '🔇 Mute',
+      color: 0xfee75c,
+      fields: [
+        { name: 'Utilisateur', value: `${target.tag} (${target.id})`, inline: true },
+        { name: 'Modérateur', value: interaction.user.tag, inline: true },
+        { name: 'Durée', value: formatDuration(ms), inline: true },
+        { name: 'Raison', value: reason },
+        { name: 'Case', value: `#${c.id}`, inline: true },
+      ],
+    }));
   },
 };

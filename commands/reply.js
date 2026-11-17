@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,5 +17,15 @@ module.exports = {
     if (!target) return interaction.reply({ content: 'Message introuvable.', ephemeral: true });
     await channel.send({ content: text, reply: { messageReference: target.id } });
     await interaction.reply({ content: 'Réponse envoyée.', ephemeral: true });
+    await sendLog(interaction.client, modLogEmbed({
+      title: '↩️ Reply',
+      color: 0x95a5a6,
+      fields: [
+        { name: 'Salon', value: `${channel}`, inline: true },
+        { name: 'Admin', value: interaction.user.tag, inline: true },
+        { name: 'Message ID', value: messageId, inline: true },
+        { name: 'Réponse', value: text.slice(0, 1024) },
+      ],
+    }));
   },
 };

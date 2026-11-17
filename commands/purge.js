@@ -1,4 +1,5 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -17,5 +18,15 @@ module.exports = {
     const deleted = await interaction.channel.bulkDelete(toDelete, true).catch(() => null);
     const count = deleted ? deleted.size : 0;
     await interaction.editReply(`🗑️ ${count} message(s) supprimé(s).`);
+    await sendLog(interaction.client, modLogEmbed({
+      title: '🗑️ Purge',
+      color: 0x95a5a6,
+      fields: [
+        { name: 'Salon', value: `${interaction.channel}`, inline: true },
+        { name: 'Modérateur', value: interaction.user.tag, inline: true },
+        { name: 'Nombre', value: `${count}`, inline: true },
+        { name: 'Filtre', value: filterUser ? filterUser.tag : 'Aucun' },
+      ],
+    }));
   },
 };

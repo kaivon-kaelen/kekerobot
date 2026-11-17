@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { listCases, removeWarn, getLastWarn, addCase, countWarns } = require('../utils/cases');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -63,5 +64,15 @@ module.exports = {
         { name: 'Avertissements restants', value: `${remaining}`, inline: true },
       ).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
+    await sendLog(interaction.client, modLogEmbed({
+      title: '✅ Unwarn',
+      color: 0x57f287,
+      fields: [
+        { name: 'Utilisateur', value: `${userTag} (${userId})`, inline: true },
+        { name: 'Modérateur', value: interaction.user.tag, inline: true },
+        { name: 'Case retirée', value: `#${targetCase.id}`, inline: true },
+        { name: 'Avertissements restants', value: `${remaining}`, inline: true },
+      ],
+    }));
   },
 };

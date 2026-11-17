@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { addCase, countWarns } = require('../utils/cases');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -33,5 +34,16 @@ module.exports = {
         { name: 'Case', value: `#${c.id}`, inline: true },
       ).setTimestamp();
     await interaction.reply({ embeds: [embed] });
+    await sendLog(interaction.client, modLogEmbed({
+      title: '⚠️ Warn',
+      color: 0xfee75c,
+      fields: [
+        { name: 'Utilisateur', value: `${target.tag} (${target.id})`, inline: true },
+        { name: 'Modérateur', value: interaction.user.tag, inline: true },
+        { name: 'Raison', value: reason },
+        { name: 'Avertissements totaux', value: `${total}`, inline: true },
+        { name: 'Case', value: `#${c.id}`, inline: true },
+      ],
+    }));
   },
 };
