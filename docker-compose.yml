@@ -1,14 +1,12 @@
 services:
   discord-bot:
-    build: .
+    image: ghcr.io/kaivon-kaelen/kekerobot:latest
     container_name: discord-bot
     restart: unless-stopped
     env_file:
       - .env
-    # Variables d'environnement optionnelles (surcharge .env)
     environment:
       - NODE_ENV=production
-    # Volumes optionnels pour persister des données (ex: base SQLite, logs)
     volumes:
       - ./data:/app/data
     logging:
