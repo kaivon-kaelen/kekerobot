@@ -13,7 +13,8 @@ module.exports = {
       const newPartial = newMessage.partial;
       if (oldPartial) await oldMessage.fetch().catch(() => null);
       if (newPartial) await newMessage.fetch().catch(() => null);
-      if (!newMessage.author || newMessage.author.bot) return;
+      if (newMessage.author?.bot) return;
+      const author = newMessage.author ? `${newMessage.author.tag} (${newMessage.author.id})` : `inconnu (${newMessage.id})`;
 
       const wasPartial = oldPartial || newPartial;
 
@@ -23,7 +24,7 @@ module.exports = {
         title: '✏️ Message édité',
         color: 0xfee75c,
         fields: [
-          { name: 'Auteur', value: `${newMessage.author.tag} (${newMessage.author.id})`, inline: true },
+          { name: 'Auteur', value: author, inline: true },
           { name: 'Salon', value: `${newMessage.channel}`, inline: true },
           { name: 'Avant', value: before },
           { name: 'Après', value: after },
