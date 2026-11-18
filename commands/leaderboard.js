@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { getLeaderboard, levelFromXP } = require('../utils/levels');
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
     const leaderboard = getLeaderboard(guildId, 10);
 
     if (!leaderboard.length) {
-      return interaction.reply({ content: 'Aucun niveau enregistré pour ce serveur.', ephemeral: true });
+      return interaction.reply({ content: 'Aucun niveau enregistré pour ce serveur.', flags: MessageFlags.Ephemeral });
     }
 
     const lines = leaderboard.map((entry, i) => {

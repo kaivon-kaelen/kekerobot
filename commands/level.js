@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const {
   getUserData,
   levelFromXP,
@@ -26,7 +26,7 @@ module.exports = {
 
     const data = getUserData(guildId, userId);
     if (!data) {
-      return interaction.reply({ content: `${target.tag} n'a encore aucun niveau enregistré.`, ephemeral: true });
+      return interaction.reply({ content: `${target.tag} n'a encore aucun niveau enregistré.`, flags: MessageFlags.Ephemeral });
     }
 
     const xp = data.xp || 0;
