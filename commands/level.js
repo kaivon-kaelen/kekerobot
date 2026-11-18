@@ -8,8 +8,9 @@ const {
 } = require('../utils/levels');
 
 function makeProgressBar(current, needed, length = 12) {
-  const ratio = Math.min(1, current / needed);
-  const filled = Math.round(ratio * length);
+  if (!needed || needed <= 0) return '░'.repeat(length);
+  const ratio = Math.max(0, Math.min(1, current / needed));
+  const filled = Math.max(0, Math.min(length, Math.round(ratio * length)));
   const empty = length - filled;
   return '█'.repeat(filled) + '░'.repeat(empty);
 }
