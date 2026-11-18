@@ -2,7 +2,7 @@ const { Events, EmbedBuilder } = require('discord.js');
 const { sendLog, modLogEmbed } = require('../utils/logger');
 const { generateWelcomeImage } = require('../utils/generateWelcome');
 
-const WELCOME_CHANNEL_ID = process.env.WELCOME_CHANNEL_ID;
+const WELCOME_CHANNEL_ID = process.env.WELCOME_CHANNEL_ID || '512447311599632406';
 
 module.exports = {
   name: Events.GuildMemberAdd,
