@@ -16,13 +16,8 @@ module.exports = {
       if (!newMessage.author || newMessage.author.bot) return;
 
       const wasPartial = oldPartial || newPartial;
-      const sameContent = oldMessage.content === newMessage.content;
-      const sameAttachments = (oldMessage.attachments?.size ?? 0) === (newMessage.attachments?.size ?? 0);
-      const sameEmbeds = (oldMessage.embeds?.length ?? 0) === (newMessage.embeds?.length ?? 0);
-      // Si le message n'était pas en cache, on ne peut pas comparer : on log quand même
-      if (!wasPartial && sameContent && sameAttachments && sameEmbeds) return;
 
-      const before = (oldMessage.content || '(pas de contenu)').slice(0, 1024);
+      const before = (oldMessage.content || (wasPartial ? '(non mis en cache)' : '(pas de contenu)')).slice(0, 1024);
       const after = (newMessage.content || '(pas de contenu)').slice(0, 1024);
       const embed = modLogEmbed({
         title: '✏️ Message édité',
