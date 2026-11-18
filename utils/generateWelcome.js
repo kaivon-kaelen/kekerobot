@@ -24,14 +24,14 @@ async function generateWelcomeImage(user, guild) {
   ctx.fillStyle = '#c75c4a';
   ctx.fillRect(0, 0, width, height);
 
-  // Motifs de plusieurs couleurs en arrière-plan
+  // Motifs de plusieurs couleurs en arrière-plan (plus épais)
   const motifColors = [
-    'rgba(255, 215, 0, 0.10)',   // or
-    'rgba(34, 197, 94, 0.10)',   // vert
-    'rgba(59, 130, 246, 0.10)',  // bleu
-    'rgba(168, 85, 247, 0.10)',  // violet
-    'rgba(251, 146, 60, 0.10)',  // orange
-    'rgba(236, 72, 153, 0.10)',  // rose
+    'rgba(255, 215, 0, 0.15)',   // or
+    'rgba(34, 197, 94, 0.15)',   // vert
+    'rgba(59, 130, 246, 0.15)',  // bleu
+    'rgba(168, 85, 247, 0.15)',  // violet
+    'rgba(251, 146, 60, 0.15)',  // orange
+    'rgba(236, 72, 153, 0.15)',  // rose
   ];
 
   for (let i = 0; i < 8; i++) {
@@ -41,29 +41,29 @@ async function generateWelcomeImage(user, guild) {
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.strokeStyle = motifColors[i % motifColors.length];
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 6;
     ctx.stroke();
 
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
     ctx.strokeStyle = motifColors[i % motifColors.length];
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 4;
     ctx.stroke();
   }
 
-  // Quelques lignes décoratives multicolores
+  // Quelques lignes décoratives multicolores plus épaisses
   const lineColors = [
-    'rgba(255, 215, 0, 0.12)',
-    'rgba(34, 197, 94, 0.12)',
-    'rgba(59, 130, 246, 0.12)',
-    'rgba(168, 85, 247, 0.12)',
+    'rgba(255, 215, 0, 0.18)',
+    'rgba(34, 197, 94, 0.18)',
+    'rgba(59, 130, 246, 0.18)',
+    'rgba(168, 85, 247, 0.18)',
   ];
   for (let i = 0; i < 4; i++) {
     ctx.beginPath();
     ctx.moveTo(0, i * 100 + 25);
     ctx.lineTo(width, i * 100 + 75);
     ctx.strokeStyle = lineColors[i % lineColors.length];
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 4;
     ctx.stroke();
   }
 
@@ -97,23 +97,23 @@ async function generateWelcomeImage(user, guild) {
   ctx.restore();
 
   // ----- Texte -----
-  const textX = avatarX + avatarSize + 120; // décalé plus à droite
+  const textX = avatarX + avatarSize + 180; // bien plus à droite
 
   ctx.textBaseline = 'middle';
 
-  // "Bienvenue" en noir
-  ctx.fillStyle = '#1a1a1a';
+  // "Bienvenue" en blanc
+  ctx.fillStyle = '#ffffff';
   ctx.font = `bold 96px ${FONT_FAMILY}`;
   ctx.textAlign = 'left';
   ctx.fillText('Bienvenue', textX, 145);
 
-  // "sur le serveur Discord" en gris foncé
-  ctx.fillStyle = '#4a4a4a';
+  // "sur le serveur Discord" en blanc
+  ctx.fillStyle = '#ffffff';
   ctx.font = `36px ${FONT_FAMILY}`;
   ctx.fillText('sur le serveur Discord', textX, 205);
 
-  // Nom du serveur en noir
-  ctx.fillStyle = '#1a1a1a';
+  // Nom du serveur en blanc
+  ctx.fillStyle = '#ffffff';
   ctx.font = `bold 48px ${FONT_FAMILY}`;
   ctx.fillText(guild.name, textX, 270);
 
