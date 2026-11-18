@@ -40,7 +40,7 @@ module.exports = {
               },
             ],
           };
-          await channel.send(embed).catch(() => {});
+          await channel.send({ content: `${message.author}`, embeds: [embed] }).catch(() => {});
         }
       }
     } catch (err) {
