@@ -60,4 +60,32 @@ if (fs.existsSync(eventsPath)) {
   console.log('[index] Événements chargés :', eventFiles.map((f) => f.replace('.js','')).join(', '));
 }
 
+// Redéployer automatiquement les commandes slash au démarrage
+const { REST, Routes } = require('discord.js');
+
+const builtCommands = [];
+client.commands.forEach((command) => {
+  if (command.data) builtCommands.push(command.data.toJSON());
+});
+
+const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
+(async () => {
+  try {
+    console.log(`[deploy] Enregistrement de ${builtCommands.length} commande(s) au démarrage...`);
+    if (process.env.GUILD_ID) {
+      await rest.put(
+        Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+        { body: builtCommands },
+      );
+      console.log('[deploy] Commandes enregistrées sur le serveur (instantané).');
+    } else {
+      await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: builtCommands });
+      console.log('[deploy] Commandes enregistrées globalement (peut prendre jusqu\'à 1h).');
+    }
+  } catch (error) {
+    console.error('[deploy] Échec de l\'enregistrement des commandes :', error);
+  }
+})();
+
 client.login(process.env.DISCORD_TOKEN);
