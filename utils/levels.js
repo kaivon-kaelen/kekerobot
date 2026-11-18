@@ -89,6 +89,7 @@ function addXP(guildId, userId, userTag, xpAmount) {
   const u = data[guildId][userId];
   u.userTag = userTag;
   u.xp += xpAmount;
+  if (u.xp < 0) u.xp = 0;
   const newLevel = levelFromXP(u.xp);
   u.level = newLevel;
   u.updatedAt = new Date().toISOString();
