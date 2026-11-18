@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder } = require('discord.js');
+const { Events } = require('discord.js');
 const { sendLog, modLogEmbed, LOG_CHANNEL_ID } = require('../utils/logger');
 
 module.exports = {
@@ -7,11 +7,14 @@ module.exports = {
     try {
       if (!oldMessage || !newMessage) return;
       if (newMessage.channel?.id === LOG_CHANNEL_ID) return;
-      if (oldMessage.partial) await oldMessage.fetch().catch(() => null);
-      if (newMessage.partial) await newMessage.fetch().catch(() => null);
+
+      const oldPartial = oldMessage.partial;
+      const newPartial = newMessage.partial;
+      if (oldPartial) await oldMessage.fetch().catch(() => null);
+      if (newPartial) await newMessage.fetch().catch(() => null);
       if (!newMessage.author || newMessage.author.bot) return;
-      const wasPartial = oldMessage.partial;
-      if (wasPartial) await oldMessage.fetch().catch(() => null);
+
+      const wasPartial = oldPartial || newPartial;
       const sameContent = oldMessage.content === newMessage.content;
       const sameAttachments = (oldMessage.attachments?.size ?? 0) === (newMessage.attachments?.size ?? 0);
       const sameEmbeds = (oldMessage.embeds?.length ?? 0) === (newMessage.embeds?.length ?? 0);
