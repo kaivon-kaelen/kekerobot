@@ -7,15 +7,17 @@ module.exports = {
     try {
       if (!message) return;
       if (message.channel?.id === LOG_CHANNEL_ID) return;
-      if (message.partial) await message.fetch().catch(() => null);
-      if (!message.author || message.author.bot) return;
+      const wasPartial = message.partial;
+      if (wasPartial) await message.fetch().catch(() => null);
+      if (message.author && message.author.bot) return;
 
-      const content = (message.content || '(pas de contenu)').slice(0, 1024);
+      const content = (message.content || (wasPartial ? '(message non mis en cache — contenu indisponible)' : '(pas de contenu)')).slice(0, 1024);
+      const author = message.author ? `${message.author.tag} (${message.author.id})` : `inconnu (${message.id})`;
       const embed = modLogEmbed({
         title: '🗑️ Message supprimé',
         color: 0xed4245,
         fields: [
-          { name: 'Auteur', value: `${message.author.tag} (${message.author.id})`, inline: true },
+          { name: 'Auteur', value: author, inline: true },
           { name: 'Salon', value: `${message.channel}`, inline: true },
           { name: 'Contenu', value: content },
         ],

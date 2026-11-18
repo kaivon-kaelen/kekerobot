@@ -10,10 +10,13 @@ module.exports = {
       if (oldMessage.partial) await oldMessage.fetch().catch(() => null);
       if (newMessage.partial) await newMessage.fetch().catch(() => null);
       if (!newMessage.author || newMessage.author.bot) return;
+      const wasPartial = oldMessage.partial;
+      if (wasPartial) await oldMessage.fetch().catch(() => null);
       const sameContent = oldMessage.content === newMessage.content;
       const sameAttachments = (oldMessage.attachments?.size ?? 0) === (newMessage.attachments?.size ?? 0);
       const sameEmbeds = (oldMessage.embeds?.length ?? 0) === (newMessage.embeds?.length ?? 0);
-      if (sameContent && sameAttachments && sameEmbeds) return;
+      // Si le message n'était pas en cache, on ne peut pas comparer : on log quand même
+      if (!wasPartial && sameContent && sameAttachments && sameEmbeds) return;
 
       const before = (oldMessage.content || '(pas de contenu)').slice(0, 1024);
       const after = (newMessage.content || '(pas de contenu)').slice(0, 1024);
