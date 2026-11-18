@@ -1,18 +1,8 @@
 const { Events, ChannelType } = require('discord.js');
 const {
-  getUserData,
   addXP,
-  setLastXP,
   levelFromXP,
-  xpNeededForCurrentLevel,
-  xpForCurrentLevel,
-  XP_COOLDOWN,
-  XP_MIN,
-  XP_MAX,
 } = require('../utils/levels');
-
-// Cooldowns en mémoire (userId -> timestamp) pour éviter d'accéder au disque à chaque message
-const cooldowns = new Map();
 
 module.exports = {
   name: Events.MessageCreate,
@@ -25,17 +15,10 @@ module.exports = {
       const guildId = message.guild.id;
       const userId = message.author.id;
 
-      // Vérification du cooldown
-      const now = Date.now();
-      const last = cooldowns.get(userId);
-      if (last && now - last < XP_COOLDOWN) return;
-
-      const xpGain = Math.floor(Math.random() * (XP_MAX - XP_MIN + 1)) + XP_MIN;
+      // XP gagné par message (sans cooldown)
+      const xpGain = Math.floor(Math.random() * (25 - 15 + 1)) + 15;
       const result = addXP(guildId, userId, message.author.tag, xpGain);
       if (!result) return;
-
-      cooldowns.set(userId, now);
-      setLastXP(guildId, userId);
 
       // Détection d'un level up
       const oldLevel = result.oldLevel;
