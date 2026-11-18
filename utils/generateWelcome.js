@@ -72,22 +72,22 @@ async function generateWelcomeImage(user, guild) {
   }
 
   // ----- Avatar à gauche -----
-  const fontSizeBienvenue = 130;
-  const avatarSize = Math.round(fontSizeBienvenue * 1.25); // avatar proportionnel au texte
-  const avatarX = 110;
+  const fontSizeBienvenue = 140;
+  const avatarSize = Math.round(fontSizeBienvenue * 1.5); // avatar plus grand, proportionnel au texte
+  const avatarX = 90;
   const avatarY = height / 2 - avatarSize / 2;
-  const textX = avatarX + avatarSize + 140; // décalé à droite de l'avatar
+  const textX = avatarX + avatarSize + 160; // décalé à droite de l'avatar
 
   // Cercle de fond derrière l'avatar
   ctx.beginPath();
-  ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 16, 0, Math.PI * 2);
+  ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 20, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
   ctx.fill();
 
   // Bordure blanche du cercle avatar
   ctx.beginPath();
-  ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 8, 0, Math.PI * 2);
-  ctx.lineWidth = 5;
+  ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 10, 0, Math.PI * 2);
+  ctx.lineWidth = 6;
   ctx.strokeStyle = '#ffffff';
   ctx.stroke();
 
@@ -106,20 +106,20 @@ async function generateWelcomeImage(user, guild) {
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
-  // "BIENVENUE"
+  // "BIENVENUE" (descendu plus bas)
   ctx.fillStyle = '#ffffff';
   ctx.font = `bold ${fontSizeBienvenue}px ${FONT_FAMILY}`;
-  ctx.fillText('BIENVENUE', textX, 145);
+  ctx.fillText('BIENVENUE', textX, 190);
 
-  // "sur le serveur Discord"
+  // "sur le serveur Discord" (descendu)
   ctx.fillStyle = '#ffffff';
-  ctx.font = `44px ${FONT_FAMILY}`;
-  ctx.fillText('sur le serveur Discord', textX, 275);
+  ctx.font = `48px ${FONT_FAMILY}`;
+  ctx.fillText('sur le serveur Discord', textX, 305);
 
-  // Nom du serveur (ex: La Kekomnauté)
+  // Nom du serveur (ex: La Kekomnauté) (descendu)
   ctx.fillStyle = '#ffffff';
-  ctx.font = `bold 60px ${FONT_FAMILY}`;
-  ctx.fillText(guild.name, textX, 345);
+  ctx.font = `bold 64px ${FONT_FAMILY}`;
+  ctx.fillText(guild.name, textX, 380);
 
   const buffer = canvas.toBuffer('image/png');
   return new AttachmentBuilder(buffer, { name: 'welcome.png' });
