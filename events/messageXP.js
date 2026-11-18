@@ -23,9 +23,15 @@ module.exports = {
       // Détection d'un level up
       const oldLevel = result.oldLevel;
       const newLevel = result.newLevel;
+      console.log(`[messageXP] level up détecté : ${message.author.tag} niveau ${oldLevel} → ${newLevel}`);
       if (newLevel > oldLevel) {
         const levelUpChannelId = process.env.LEVEL_UP_CHANNEL_ID || '1398594760427438230';
-        const channel = message.client.channels.cache.get(levelUpChannelId);
+        let channel = message.client.channels.cache.get(levelUpChannelId);
+        if (!channel) {
+          try {
+            channel = await message.client.channels.fetch(levelUpChannelId);
+          } catch {}
+        }
         if (!channel || !channel.isTextBased()) {
           console.warn(`[messageXP] Salon de level up introuvable : ${levelUpChannelId}`);
         } else {
