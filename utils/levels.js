@@ -51,21 +51,17 @@ function levelFromXP(totalXP) {
   return level;
 }
 
-// XP déjà accumulée pour les niveaux précédents (pour la barre de progression)
+// XP déjà accumulée pour le niveau actuel (pour la barre de progression)
 function xpForCurrentLevel(totalXP) {
   const level = levelFromXP(totalXP);
   if (level === 0) return totalXP;
-  let before = 0;
-  for (let l = 1; l <= level; l += 1) {
-    before += xpForLevel(l);
-  }
-  return totalXP - before;
+  return totalXP - xpForLevel(level);
 }
 
-// XP nécessaire pour le niveau actuel (de level à level+1)
+// XP nécessaire pour passer au niveau suivant (de level à level+1)
 function xpNeededForCurrentLevel(totalXP) {
   const level = levelFromXP(totalXP);
-  return xpForLevel(level + 1);
+  return xpForLevel(level + 1) - xpForLevel(level);
 }
 
 function getUserData(guildId, userId) {
