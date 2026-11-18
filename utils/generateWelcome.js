@@ -16,7 +16,7 @@ if (fs.existsSync(FONT_PATH)) {
  */
 async function generateWelcomeImage(user, guild) {
   const width = 1200;
-  const height = 400;
+  const height = 450;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
@@ -72,7 +72,7 @@ async function generateWelcomeImage(user, guild) {
   }
 
   // ----- Avatar à gauche -----
-  const fontSizeBienvenue = 140;
+  const fontSizeBienvenue = 160;
   const avatarSize = Math.round(fontSizeBienvenue * 1.5); // avatar plus grand, proportionnel au texte
   const avatarX = 90;
   const avatarY = height / 2 - avatarSize / 2;
@@ -106,20 +106,20 @@ async function generateWelcomeImage(user, guild) {
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
-  // "BIENVENUE" (descendu plus bas)
+  // "BIENVENUE" (encore plus gros et centré verticalement)
   ctx.fillStyle = '#ffffff';
   ctx.font = `bold ${fontSizeBienvenue}px ${FONT_FAMILY}`;
-  ctx.fillText('BIENVENUE', textX, 190);
+  ctx.fillText('BIENVENUE', textX, height / 2 - 20);
 
-  // "sur le serveur Discord" (descendu)
+  // "sur le serveur Discord"
   ctx.fillStyle = '#ffffff';
-  ctx.font = `48px ${FONT_FAMILY}`;
-  ctx.fillText('sur le serveur Discord', textX, 305);
+  ctx.font = `50px ${FONT_FAMILY}`;
+  ctx.fillText('sur le serveur Discord', textX, height / 2 + 70);
 
-  // Nom du serveur (ex: La Kekomnauté) (descendu)
+  // Nom du serveur (ex: La Kekomnauté)
   ctx.fillStyle = '#ffffff';
-  ctx.font = `bold 64px ${FONT_FAMILY}`;
-  ctx.fillText(guild.name, textX, 380);
+  ctx.font = `bold 68px ${FONT_FAMILY}`;
+  ctx.fillText(guild.name, textX, height / 2 + 150);
 
   const buffer = canvas.toBuffer('image/png');
   return new AttachmentBuilder(buffer, { name: 'welcome.png' });
