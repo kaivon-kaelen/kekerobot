@@ -1,15 +1,14 @@
-const { createCanvas, loadImage, registerFont } = require('@napi-rs/canvas');
+const { createCanvas, loadImage, GlobalFonts } = require('@napi-rs/canvas');
 const { AttachmentBuilder } = require('discord.js');
 const path = require('node:path');
 const fs = require('node:fs');
 
 // Police embarquée : assets/fonts/WelcomeFont.ttf (Bebas Neue, style gras et moderne)
 const FONT_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'WelcomeFont.ttf');
+const FONT_FAMILY = 'WelcomeFont';
 if (fs.existsSync(FONT_PATH)) {
-  registerFont(FONT_PATH, { family: 'WelcomeFont' });
+  GlobalFonts.registerFromPath(FONT_PATH, FONT_FAMILY);
 }
-
-const FONT_FAMILY = fs.existsSync(FONT_PATH) ? 'WelcomeFont' : 'sans-serif';
 
 /**
  * Génère une image de bienvenue style "banner horizontal"
