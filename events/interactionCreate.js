@@ -92,9 +92,11 @@ module.exports = {
       const forum = await interaction.client.channels.fetch(FORUM_ID).catch(() => null);
       if (!forum) return interaction.editReply('Forum introuvable.');
 
-      // Créer le thread
+      // Créer le thread avec la raison dans le titre (max 100 caractères)
+      const shortReason = reason.replace(/\s+/g, ' ').trim();
+      const threadName = `Modmail — ${interaction.user.tag} — ${shortReason}`.slice(0, 100);
       const thread = await forum.threads.create({
-        name: `Modmail — ${interaction.user.tag}`.slice(0, 100),
+        name: threadName,
         message: {
           embeds: [
             new EmbedBuilder()
