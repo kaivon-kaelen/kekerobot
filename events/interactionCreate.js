@@ -1,4 +1,4 @@
-const { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, ChannelType } = require('discord.js');
+const { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, ChannelType, MessageFlags } = require('discord.js');
 const { getOpenByUser, createTicket } = require('../utils/modmail');
 const { sendLog, modLogEmbed } = require('../utils/logger');
 const pending = require('../utils/modmail-pending');
@@ -189,11 +189,19 @@ module.exports = {
       await command.execute(interaction);
     } catch (error) {
       console.error(error);
-      const reply = { content: 'Une erreur est survenue lors de l\'exécution de cette commande.', ephemeral: true };
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(reply);
-      } else {
-        await interaction.reply(reply);
+      // L'interaction peut être expirée (10062) : ne jamais laisser le message
+      // d'erreur lui-même rejeter et faire crasher le bot.
+      try {
+        if (interaction.isRepliable()) {
+          const reply = { content: 'Une erreur est survenue lors de l\'exécution de cette commande.', flags: MessageFlags.Ephemeral };
+          if (interaction.replied || interaction.deferred) {
+            await interaction.followUp(reply).catch(() => {});
+          } else {
+            await interaction.reply(reply).catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.error('[interactionCreate] Impossible d\'envoyer le message d\'erreur :', err?.message);
       }
     }
   },

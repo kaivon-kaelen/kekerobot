@@ -22,6 +22,11 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.GuildMember, Partials.User],
 });
 
+// Évite qu'une erreur non gérée (ex. interaction expirée) fasse tomber le processus
+client.on('error', (error) => {
+  console.error('[client] Erreur non gérée :', error?.message || error);
+});
+
 client.commands = new Collection();
 
 // Charger les commandes
