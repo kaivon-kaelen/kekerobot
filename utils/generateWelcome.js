@@ -3,8 +3,8 @@ const { AttachmentBuilder } = require('discord.js');
 const path = require('node:path');
 const fs = require('node:fs');
 
-// Police embarquée : place un fichier .ttf dans assets/fonts/DejaVuSans.ttf
-const FONT_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'DejaVuSans.ttf');
+// Police embarquée : assets/fonts/WelcomeFont.ttf (Bebas Neue, style gras et moderne)
+const FONT_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'WelcomeFont.ttf');
 if (fs.existsSync(FONT_PATH)) {
   registerFont(FONT_PATH, { family: 'WelcomeFont' });
 }
