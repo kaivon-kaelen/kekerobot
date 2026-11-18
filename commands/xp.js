@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const { addXP, getUserData, levelFromXP, xpForLevel } = require('../utils/levels');
 
 module.exports = {
@@ -36,7 +36,7 @@ module.exports = {
     if (sub === 'add') {
       const amount = interaction.options.getInteger('montant');
       const data = addXP(guildId, userId, target.tag, amount);
-      if (!data) return interaction.reply({ content: 'Erreur lors de l\'ajout d\'XP.', ephemeral: true });
+      if (!data) return interaction.reply({ content: 'Erreur lors de l\'ajout d\'XP.', flags: MessageFlags.Ephemeral });
 
       const embed = new EmbedBuilder()
         .setTitle('➕ XP ajoutée')
@@ -53,12 +53,12 @@ module.exports = {
     if (sub === 'remove') {
       const amount = interaction.options.getInteger('montant');
       const current = getUserData(guildId, userId);
-      if (!current) return interaction.reply({ content: `${target.tag} n'a aucun XP enregistré.`, ephemeral: true });
+      if (!current) return interaction.reply({ content: `${target.tag} n'a aucun XP enregistré.`, flags: MessageFlags.Ephemeral });
 
       const newXP = Math.max(0, (current.xp || 0) - amount);
       const newLevel = levelFromXP(newXP);
       const data = addXP(guildId, userId, target.tag, newXP - (current.xp || 0));
-      if (!data) return interaction.reply({ content: 'Erreur lors du retrait d\'XP.', ephemeral: true });
+      if (!data) return interaction.reply({ content: 'Erreur lors du retrait d\'XP.', flags: MessageFlags.Ephemeral });
 
       const embed = new EmbedBuilder()
         .setTitle('➖ XP retirée')
@@ -79,7 +79,7 @@ module.exports = {
       const currentXP = current ? current.xp : 0;
       const diff = targetXP - currentXP;
       const data = addXP(guildId, userId, target.tag, diff);
-      if (!data) return interaction.reply({ content: 'Erreur lors de la définition du niveau.', ephemeral: true });
+      if (!data) return interaction.reply({ content: 'Erreur lors de la définition du niveau.', flags: MessageFlags.Ephemeral });
 
       const embed = new EmbedBuilder()
         .setTitle('🎯 Niveau défini')
@@ -93,6 +93,6 @@ module.exports = {
       return interaction.reply({ embeds: [embed] });
     }
 
-    return interaction.reply({ content: 'Sous-commande inconnue.', ephemeral: true });
+    return interaction.reply({ content: 'Sous-commande inconnue.', flags: MessageFlags.Ephemeral });
   },
 };
