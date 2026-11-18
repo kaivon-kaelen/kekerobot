@@ -6,6 +6,23 @@ const { addMapping } = require('../utils/modmail-messages');
 
 const FORUM_ID = process.env.MODMAIL_FORUM_CHANNEL_ID;
 
+// Supprime le message de confirmation (boutons) une fois le choix fait
+async function deleteConfirmationMessage(interaction, pendingData) {
+  try {
+    if (interaction.message?.deletable) {
+      await interaction.message.delete();
+      return;
+    }
+    if (pendingData?.confirmationMessageId) {
+      const channel = await interaction.client.channels.fetch(pendingData.dmChannelId);
+      const message = await channel.messages.fetch(pendingData.confirmationMessageId);
+      await message.delete();
+    }
+  } catch {
+    // Message déjà supprimé ou introuvable : rien à faire
+  }
+}
+
 module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction) {
@@ -27,6 +44,7 @@ module.exports = {
         } catch {}
       }
       await interaction.reply({ content: '❌ Envoi annulé.', ephemeral: true });
+      await deleteConfirmationMessage(interaction, p);
       return;
     }
 
@@ -55,6 +73,7 @@ module.exports = {
 
       modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
       await interaction.showModal(modal);
+      await deleteConfirmationMessage(interaction, p);
       return;
     }
 
@@ -122,6 +141,7 @@ module.exports = {
         if (attMsg) addMapping(p.messageId, attMsg.id, thread.id, userId);
       }
 
+      await deleteConfirmationMessage(interaction, p);
       pending.delete(userId);
 
       await interaction.editReply('✅ Votre message a été envoyé à la modération.');

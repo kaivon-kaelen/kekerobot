@@ -46,13 +46,6 @@ module.exports = {
       }
 
       // Pas de ticket : demander confirmation via bouton
-      pending.set(message.author.id, {
-        messageId: message.id,
-        content: message.content || '',
-        attachmentUrls: [...message.attachments.values()].map((a) => a.url),
-        dmChannelId: message.channel.id,
-      });
-
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setCustomId(`modmail_confirm_${message.author.id}`)
@@ -66,7 +59,7 @@ module.exports = {
           .setEmoji('❌'),
       );
 
-      await message.reply({
+      const confirmation = await message.reply({
         embeds: [
           new EmbedBuilder()
             .setTitle('Confirmation modmail')
@@ -75,6 +68,15 @@ module.exports = {
         ],
         components: [row],
       }).catch(() => {});
+
+      pending.set(message.author.id, {
+        messageId: message.id,
+        content: message.content || '',
+        attachmentUrls: [...message.attachments.values()].map((a) => a.url),
+        dmChannelId: message.channel.id,
+        confirmationMessageId: confirmation?.id,
+      });
+
       await message.react('⏳').catch(() => {});
       return;
     }

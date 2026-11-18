@@ -1,9 +1,10 @@
 const { Events, ActivityType } = require('discord.js');
+const { announceUpdate } = require('../utils/changelog');
 
 module.exports = {
   name: Events.ClientReady,
   once: true,
-  execute(client) {
+  async execute(client) {
     console.log(`Bot connecté en tant que ${client.user.tag}`);
     console.log(`Présent sur ${client.guilds.cache.size} serveur(s).`);
 
@@ -21,6 +22,11 @@ module.exports = {
         },
       ],
       status: 'online',
+    });
+
+    // Annoncer la mise à jour si la version de l'image a changé
+    await announceUpdate(client).catch((err) => {
+      console.error('[ready] Annonce de mise à jour impossible :', err?.message);
     });
   },
 };

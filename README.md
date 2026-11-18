@@ -72,6 +72,14 @@ Mode développement (rechargement auto) :
 npm run dev
 ```
 
+## Mises à jour et changelog
+
+À chaque `push` sur `main`, la CI génère `CHANGELOG.json` depuis l'historique Git et l'embarque dans l'image Docker.
+
+Lorsque le conteneur est mis à jour (par exemple via Arcane), le bot envoie au démarrage un message dans le salon `1369717395811336212` contenant **tous les commits depuis la dernière version annoncée**. La dernière version annoncée est persistée dans `data/changelog-state.json` (volume `./data`), donc un simple redémarrage sans nouvelle image ne renvoie rien.
+
+Le salon peut être surchargé avec `CHANGELOG_CHANNEL_ID` dans le `.env`.
+
 ## Structure
 
 ```
