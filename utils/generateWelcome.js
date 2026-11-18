@@ -1,5 +1,15 @@
-const { createCanvas, loadImage } = require('@napi-rs/canvas');
+const { createCanvas, loadImage, registerFont } = require('@napi-rs/canvas');
 const { AttachmentBuilder } = require('discord.js');
+const path = require('node:path');
+const fs = require('node:fs');
+
+// Police embarquée : place un fichier .ttf dans assets/fonts/DejaVuSans.ttf
+const FONT_PATH = path.join(__dirname, '..', 'assets', 'fonts', 'DejaVuSans.ttf');
+if (fs.existsSync(FONT_PATH)) {
+  registerFont(FONT_PATH, { family: 'WelcomeFont' });
+}
+
+const FONT_FAMILY = fs.existsSync(FONT_PATH) ? 'WelcomeFont' : 'sans-serif';
 
 /**
  * Génère une image de bienvenue style "banner horizontal"
@@ -79,18 +89,18 @@ async function generateWelcomeImage(user, guild) {
 
   // "Bienvenue"
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 96px sans-serif';
+  ctx.font = `bold 96px ${FONT_FAMILY}`;
   ctx.textAlign = 'left';
   ctx.fillText('Bienvenue', textX, 145);
 
   // "sur le serveur Discord"
   ctx.fillStyle = '#ffe3d9';
-  ctx.font = '36px sans-serif';
+  ctx.font = `36px ${FONT_FAMILY}`;
   ctx.fillText('sur le serveur Discord', textX, 205);
 
   // Nom du serveur (ex: La Kekomnauté)
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 48px sans-serif';
+  ctx.font = `bold 48px ${FONT_FAMILY}`;
   ctx.fillText(guild.name, textX, 270);
 
   const buffer = canvas.toBuffer('image/png');
