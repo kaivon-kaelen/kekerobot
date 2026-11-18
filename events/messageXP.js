@@ -33,20 +33,14 @@ module.exports = {
           } catch {}
         }
         if (!channel || !channel.isTextBased()) {
-          console.warn(`[messageXP] Salon de level up introuvable : ${levelUpChannelId}`);
+          console.warn(`[messageXP] Salon de level up introuvable ou non textuel : ${levelUpChannelId}`);
         } else {
-          const embed = {
-            embeds: [
-              {
-                title: '🎉 Montée de niveau !',
-                description: `${message.author} est maintenant **niveau ${newLevel}** !`,
-                color: 0x5865f2,
-                timestamp: new Date().toISOString(),
-                footer: { text: 'Continuez à discuter pour monter de niveau !' },
-              },
-            ],
-          };
-          await channel.send({ content: `${message.author}`, embeds: [embed] }).catch(() => {});
+          try {
+            await channel.send({ content: `${message.author}`, embeds: [embed] });
+            console.log(`[messageXP] Annonce envoyée dans le salon ${levelUpChannelId}`);
+          } catch (err) {
+            console.error(`[messageXP] Impossible d'envoyer l'annonce dans le salon ${levelUpChannelId} :`, err?.message);
+          }
         }
       }
     } catch (err) {
