@@ -11,7 +11,7 @@ module.exports = {
     const input = interaction.options.getString('user').trim();
     let cases = listCases({ guildId: interaction.guild.id, limit: 100 });
 
-    if (/^\\d+$/.test(input)) {
+    if (/^\d+$/.test(input)) {
       cases = cases.filter((c) => c.userId === input);
     } else {
       const q = input.toLowerCase();

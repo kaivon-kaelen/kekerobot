@@ -17,7 +17,7 @@ module.exports = {
     let userId = null;
     let user = null;
 
-    if (/^\\d+$/.test(input.trim())) {
+    if (/^\d+$/.test(input.trim())) {
       userId = input.trim();
       try { user = await interaction.client.users.fetch(userId); } catch { user = null; }
     } else {

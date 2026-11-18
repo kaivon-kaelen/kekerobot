@@ -148,6 +148,21 @@ module.exports = {
       return;
     }
 
+    // Log des commandes de modération utilisées
+    const MOD_COMMANDS = new Set(['ban','unban','kick','mute','unmute','warn','unwarn','purge','say','reply','replay','close','modpanel','cases','case','casedetail','warnings']);
+    if (MOD_COMMANDS.has(interaction.commandName)) {
+      const { sendLog, modLogEmbed } = require('../utils/logger');
+      await sendLog(interaction.client, modLogEmbed({
+        title: '⚙️ Commande de modération utilisée',
+        color: 0x95a5a6,
+        fields: [
+          { name: 'Commande', value: `/${interaction.commandName}`, inline: true },
+          { name: 'Utilisateur', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
+          { name: 'Salon', value: `${interaction.channel}`, inline: true },
+        ],
+      }));
+    }
+
     try {
       await command.execute(interaction);
     } catch (error) {
