@@ -41,19 +41,24 @@ module.exports = {
       const oldLevel = result.oldLevel;
       const newLevel = result.newLevel;
       if (newLevel > oldLevel) {
-        const channel = message.channel;
-        const embed = {
-          embeds: [
-            {
-              title: '🎉 Montée de niveau !',
-              description: `${message.author} est maintenant **niveau ${newLevel}** !`,
-              color: 0x5865f2,
-              timestamp: new Date().toISOString(),
-              footer: { text: 'Continuez à discuter pour monter de niveau !' },
-            },
-          ],
-        };
-        await channel.send(embed).catch(() => {});
+        const levelUpChannelId = process.env.LEVEL_UP_CHANNEL_ID || '1398594760427438230';
+        const channel = message.client.channels.cache.get(levelUpChannelId);
+        if (!channel || !channel.isTextBased()) {
+          console.warn(`[messageXP] Salon de level up introuvable : ${levelUpChannelId}`);
+        } else {
+          const embed = {
+            embeds: [
+              {
+                title: '🎉 Montée de niveau !',
+                description: `${message.author} est maintenant **niveau ${newLevel}** !`,
+                color: 0x5865f2,
+                timestamp: new Date().toISOString(),
+                footer: { text: 'Continuez à discuter pour monter de niveau !' },
+              },
+            ],
+          };
+          await channel.send(embed).catch(() => {});
+        }
       }
     } catch (err) {
       console.error('[messageXP]', err?.message);
