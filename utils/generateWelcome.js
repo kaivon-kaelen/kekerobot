@@ -1,11 +1,5 @@
-const { createCanvas, loadImage, registerFont } = require('@napi-rs/canvas');
+const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const { AttachmentBuilder } = require('discord.js');
-
-try {
-  registerFont('./assets/fonts/Bold.ttf', { family: 'WelcomeFont' });
-} catch {
-  // Police système par défaut
-}
 
 /**
  * Génère une image de bienvenue style "banner horizontal"
@@ -18,7 +12,6 @@ async function generateWelcomeImage(user, guild) {
   const ctx = canvas.getContext('2d');
 
   // ----- Fond avec motifs -----
-  // Couleur de base (terracotta / rouge orangé)
   ctx.fillStyle = '#c75c4a';
   ctx.fillRect(0, 0, width, height);
 
@@ -81,6 +74,8 @@ async function generateWelcomeImage(user, guild) {
 
   // ----- Texte -----
   const textX = avatarX + avatarSize + 50; // à droite de l'avatar
+
+  ctx.textBaseline = 'middle';
 
   // "Bienvenue"
   ctx.fillStyle = '#ffffff';
