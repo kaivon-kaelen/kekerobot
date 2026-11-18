@@ -7,6 +7,7 @@ module.exports = {
     try {
       if (!oldMessage || !newMessage) return;
       if (newMessage.channel?.id === LOG_CHANNEL_ID) return;
+      console.log('[messageUpdate] fired', newMessage.id, 'author=', newMessage.author?.tag, 'partial=', oldMessage.partial, newMessage.partial);
 
       const oldPartial = oldMessage.partial;
       const newPartial = newMessage.partial;

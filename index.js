@@ -52,6 +52,7 @@ if (fs.existsSync(eventsPath)) {
       client.on(event.name, (...args) => event.execute(...args));
     }
   }
+  console.log('[index] Événements chargés :', eventFiles.map((f) => f.replace('.js','')).join(', '));
 }
 
 client.login(process.env.DISCORD_TOKEN);
