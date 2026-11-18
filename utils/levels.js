@@ -86,12 +86,13 @@ function addXP(guildId, userId, userTag, xpAmount) {
   u.userTag = userTag;
   u.xp += xpAmount;
   if (u.xp < 0) u.xp = 0;
+  const oldLevel = u.level || 0;
   const newLevel = levelFromXP(u.xp);
   u.level = newLevel;
   u.updatedAt = new Date().toISOString();
   save(data);
   cache = null; // invalider le cache
-  return { newLevel, oldLevel: u.level, xp: u.xp };
+  return { newLevel, oldLevel, xp: u.xp };
 }
 
 function setLastXP(guildId, userId) {
