@@ -1,71 +1,102 @@
 const { createCanvas, loadImage, registerFont } = require('@napi-rs/canvas');
 const { AttachmentBuilder } = require('discord.js');
 
-// Optionnel : charger une police personnalisée si présente
 try {
   registerFont('./assets/fonts/Bold.ttf', { family: 'WelcomeFont' });
 } catch {
   // Police système par défaut
 }
 
+/**
+ * Génère une image de bienvenue style "banner horizontal"
+ * avec avatar à gauche et texte blanc sur fond à motifs.
+ */
 async function generateWelcomeImage(user, guild) {
-  const width = 1024;
-  const height = 512;
+  const width = 1200;
+  const height = 400;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
-  // Fond sombre
-  ctx.fillStyle = '#2b2d31';
+  // ----- Fond avec motifs -----
+  // Couleur de base (terracotta / rouge orangé)
+  ctx.fillStyle = '#c75c4a';
   ctx.fillRect(0, 0, width, height);
 
-  // Cercle de couleur derrière l'avatar
+  // Motifs : cercles concentriques décalés en arrière-plan
+  for (let i = 0; i < 6; i++) {
+    const cx = (i * 210) % width + 100;
+    const cy = (i * 170) % height + 50;
+    const r = 60 + i * 25;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.6, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // Quelques lignes décoratives fines
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(0, i * 100 + 30);
+    ctx.lineTo(width, i * 100 + 80);
+    ctx.stroke();
+  }
+
+  // ----- Avatar à gauche -----
+  const avatarSize = 180;
+  const avatarX = 110;
+  const avatarY = height / 2 - avatarSize / 2;
+
+  // Cercle de fond derrière l'avatar
   ctx.beginPath();
-  ctx.arc(width / 2, height / 2 - 40, 125, 0, Math.PI * 2);
-  ctx.fillStyle = '#5865f2';
+  ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 12, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
   ctx.fill();
 
-  // Bordure blanche du cercle
+  // Bordure blanche du cercle avatar
   ctx.beginPath();
-  ctx.arc(width / 2, height / 2 - 40, 125, 0, Math.PI * 2);
-  ctx.lineWidth = 6;
+  ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 6, 0, Math.PI * 2);
+  ctx.lineWidth = 4;
   ctx.strokeStyle = '#ffffff';
   ctx.stroke();
-
-  // Avatar de l'utilisateur
-  const avatarUrl = user.displayAvatarURL({ extension: 'png', size: 512 });
-  const avatar = await loadImage(avatarUrl);
 
   // Masque circulaire pour l'avatar
   ctx.save();
   ctx.beginPath();
-  ctx.arc(width / 2, height / 2 - 40, 100, 0, Math.PI * 2);
+  ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
   ctx.clip();
-  ctx.drawImage(avatar, width / 2 - 100, height / 2 - 140, 200, 200);
+
+  const avatarUrl = user.displayAvatarURL({ extension: 'png', size: 512 });
+  const avatar = await loadImage(avatarUrl);
+  ctx.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize);
   ctx.restore();
 
-  // Texte : pseudo de l'utilisateur
+  // ----- Texte -----
+  const textX = avatarX + avatarSize + 50; // à droite de l'avatar
+
+  // "Bienvenue"
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 96px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Bienvenue', textX, 145);
+
+  // "sur le serveur Discord"
+  ctx.fillStyle = '#ffe3d9';
+  ctx.font = '36px sans-serif';
+  ctx.fillText('sur le serveur Discord', textX, 205);
+
+  // Nom du serveur (ex: La Kekomnauté)
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 48px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(user.username, width / 2, height / 2 + 125);
-
-  // Texte : nom du serveur
-  ctx.fillStyle = '#99aab5';
-  ctx.font = '28px sans-serif';
-  ctx.fillText(`Bienvenue sur ${guild.name}`, width / 2, height / 2 + 170);
-
-  // Ligne séparatrice
-  ctx.beginPath();
-  ctx.moveTo(width / 2 - 150, height / 2 + 200);
-  ctx.lineTo(width / 2 + 150, height / 2 + 200);
-  ctx.strokeStyle = '#5865f2';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Texte : membre numéro
-  ctx.fillStyle = '#99aab5';
-  ctx.font = '22px sans-serif';
-  ctx.fillText(`Membre #${guild.memberCount}`, width / 2, height / 2 + 240);
+  ctx.fillText(guild.name, textX, 270);
 
   const buffer = canvas.toBuffer('image/png');
   return new AttachmentBuilder(buffer, { name: 'welcome.png' });
