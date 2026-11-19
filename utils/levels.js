@@ -34,12 +34,15 @@ function save(data) {
   fs.writeFileSync(FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// XP cumulée nécessaire pour ATTENDRE un niveau donné.
-// Le niveau 0 est le point de départ : 0 XP cumulée.
+// XP cumulée nécessaire pour atteindre un niveau donné.
+// Chaque niveau demande exactement le même effort : XP_PER_LEVEL.
+// (L'ancienne formule demandait 155 XP pour le niveau 1, puis seulement
+//  65/75/85/95 XP pour les suivants, ce qui était incohérent.)
+const XP_PER_LEVEL = 100;
+
 function xpForLevel(level) {
   if (level <= 0) return 0;
-  // Formule progressive : 5 * niveau^2 + 50 * niveau + 100
-  return Math.floor(5 * (level ** 2) + 50 * level + 100);
+  return level * XP_PER_LEVEL;
 }
 
 // Calcule le niveau à partir d'un total d'XP
