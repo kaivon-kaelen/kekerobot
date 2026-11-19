@@ -31,7 +31,8 @@ module.exports = {
     }
 
     const xp = data.xp || 0;
-    const level = data.level || levelFromXP(xp);
+    // Toujours dériver le niveau de l'XP (les données plus anciennes peuvent être obsolètes)
+    const level = levelFromXP(xp);
     const currentXP = xpForCurrentLevel(xp);
     const neededXP = xpNeededForCurrentLevel(xp);
     const rank = getRank(guildId, userId);

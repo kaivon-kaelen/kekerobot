@@ -34,8 +34,10 @@ function save(data) {
   fs.writeFileSync(FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// Calcule l'XP nécessaire pour atteindre le niveau suivant
+// XP cumulée nécessaire pour ATTENDRE un niveau donné.
+// Le niveau 0 est le point de départ : 0 XP cumulée.
 function xpForLevel(level) {
+  if (level <= 0) return 0;
   // Formule progressive : 5 * niveau^2 + 50 * niveau + 100
   return Math.floor(5 * (level ** 2) + 50 * level + 100);
 }
@@ -51,11 +53,9 @@ function levelFromXP(totalXP) {
   return level;
 }
 
-// XP déjà accumulée pour le niveau actuel (pour la barre de progression)
+// XP déjà accumulée depuis le seuil du niveau actuel (barre de progression)
 function xpForCurrentLevel(totalXP) {
-  const level = levelFromXP(totalXP);
-  if (level === 0) return totalXP;
-  return totalXP - xpForLevel(level);
+  return totalXP - xpForLevel(levelFromXP(totalXP));
 }
 
 // XP nécessaire pour passer au niveau suivant (de level à level+1)
@@ -84,9 +84,9 @@ function addXP(guildId, userId, userTag, xpAmount) {
   }
   const u = data[guildId][userId];
   u.userTag = userTag;
+  const oldLevel = levelFromXP(u.xp || 0);
   u.xp += xpAmount;
   if (u.xp < 0) u.xp = 0;
-  const oldLevel = u.level || 0;
   const newLevel = levelFromXP(u.xp);
   u.level = newLevel;
   u.updatedAt = new Date().toISOString();
@@ -111,7 +111,7 @@ function getLeaderboard(guildId, limit = 10) {
     userId,
     userTag: u.userTag || 'inconnu',
     xp: u.xp || 0,
-    level: u.level || 0,
+    level: levelFromXP(u.xp || 0),
   }));
   entries.sort((a, b) => b.xp - a.xp);
   return entries.slice(0, limit);
