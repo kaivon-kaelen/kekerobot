@@ -80,6 +80,22 @@ Lorsque le conteneur est mis à jour (par exemple via Arcane), le bot envoie au 
 
 Le salon peut être surchargé avec `CHANGELOG_CHANNEL_ID` dans le `.env`.
 
+## Annonces de live Twitch
+
+Le bot vérifie périodiquement (toutes les 2 minutes par défaut) si les chaînes configurées sont en direct via l'API Helix de Twitch, et envoie un embed dans `LIVE_CHANNEL_ID` dès qu'un live commence. Aucun webhook ni URL publique n'est nécessaire.
+
+Configuration dans le `.env` :
+
+```env
+TWITCH_CLIENT_ID=...
+TWITCH_CLIENT_SECRET=...
+TWITCH_CHANNELS=kekos_yt,une_autre_chaine
+LIVE_CHANNEL_ID=1369717395811336212
+LIVE_POLL_INTERVAL_MS=120000
+```
+
+Crée l'application sur https://dev.twitch.tv/console/apps (OAuth Redirect URL : `http://localhost`). L'état des lives est persisté dans `data/live-state.json`, donc un redémarrage n'annonce pas deux fois le même live. Si les variables Twitch sont absentes, le module se désactive sans rien envoyer.
+
 ## Structure
 
 ```

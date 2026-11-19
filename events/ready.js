@@ -1,5 +1,6 @@
 const { Events, ActivityType } = require('discord.js');
 const { announceUpdate } = require('../utils/changelog');
+const { startLiveAnnouncer } = require('../utils/live-announcer');
 
 module.exports = {
   name: Events.ClientReady,
@@ -28,5 +29,8 @@ module.exports = {
     await announceUpdate(client).catch((err) => {
       console.error('[ready] Annonce de mise à jour impossible :', err?.message);
     });
+
+    // Surveillance des lives Twitch
+    startLiveAnnouncer(client);
   },
 };
