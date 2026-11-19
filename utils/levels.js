@@ -35,14 +35,11 @@ function save(data) {
 }
 
 // XP cumulée nécessaire pour atteindre un niveau donné.
-// Chaque niveau demande exactement le même effort : XP_PER_LEVEL.
-// (L'ancienne formule demandait 155 XP pour le niveau 1, puis seulement
-//  65/75/85/95 XP pour les suivants, ce qui était incohérent.)
-const XP_PER_LEVEL = 100;
-
+// Difficulté progressive (pas linéaire) : 100 XP pour le niveau 1,
+// puis 50 XP de plus à chaque palier -> 150, 200, 250, 300, ...
 function xpForLevel(level) {
   if (level <= 0) return 0;
-  return level * XP_PER_LEVEL;
+  return 100 * level + 25 * level * (level - 1);
 }
 
 // Calcule le niveau à partir d'un total d'XP
