@@ -12,6 +12,7 @@ const CHANNELS = (process.env.TWITCH_CHANNELS || '')
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
 const ANNOUNCE_CHANNEL_ID = process.env.LIVE_CHANNEL_ID || '1369717395811336212';
+const PING_ROLE_ID = process.env.LIVE_PING_ROLE_ID || '1375922056503361536';
 const POLL_INTERVAL = Math.max(30000, Number(process.env.LIVE_POLL_INTERVAL_MS) || 120000);
 const INITIAL_DELAY = Number(process.env.LIVE_INITIAL_DELAY_MS ?? 5000);
 
@@ -45,7 +46,6 @@ async function getAppToken() {
   if (!res.ok) throw new Error(`Twitch OAuth ${res.status}: ${await res.text()}`);
   const data = await res.json();
   token = data.access_token;
-  // On renouvelle 1 minute avant l'expiration réelle
   tokenExpiresAt = Date.now() - 60000 + (data.expires_in || 3600) * 1000;
   return token;
 }
@@ -63,7 +63,7 @@ async function getStreams(logins) {
   });
   if (!res.ok) {
     if (res.status === 401) {
-      token = null; // jeton périmé : on le régénérera au prochain tour
+      token = null;
       tokenExpiresAt = 0;
     }
     throw new Error(`Twitch Helix ${res.status}: ${await res.text()}`);
@@ -100,22 +100,32 @@ function buildEmbed(stream) {
 async function announce(stream) {
   let channel = clientRef.channels.cache.get(ANNOUNCE_CHANNEL_ID);
   if (!channel) {
-    channel = await clientRef.channels.fetch(ANNOUNCE_CHANNEL_ID).catch(() => null);
+    try {
+      channel = await clientRef.channels.fetch(ANNOUNCE_CHANNEL_ID);
+    } catch {}
   }
   if (!channel || !channel.isTextBased()) {
     console.error(`[live] Salon d'annonce introuvable ou non textuel : ${ANNOUNCE_CHANNEL_ID}`);
     return;
   }
-  await channel.send({ embeds: [buildEmbed(stream)] }).catch((err) => {
+
+  const content = PING_ROLE_ID ? `<@&${PING_ROLE_ID}>` : null;
+
+  try {
+    await channel.send({ content, embeds: [buildEmbed(stream)] });
+    console.log(`[live] Annonce envoyée pour ${stream.user_login} (rôle ping: ${PING_ROLE_ID || 'aucun'})`);
+  } catch (err) {
     console.error('[live] Impossible d\'envoyer l\'annonce :', err?.message);
-  });
+  }
 }
 
 async function poll() {
   if (polling) return;
   polling = true;
   try {
+    console.log(`[live] Vérification des streams Twitch : ${CHANNELS.join(', ')}`);
     const streams = await getStreams(CHANNELS);
+    console.log(`[live] ${streams.length} stream(s) live détecté(s) par l'API Twitch`);
     const liveByLogin = new Map(streams.map((s) => [s.user_login.toLowerCase(), s]));
     const state = loadState();
     let changed = false;
@@ -127,6 +137,7 @@ async function poll() {
       if (stream) {
         const alreadyAnnounced = prev?.streamId === stream.id && prev.announced;
         if (!alreadyAnnounced) {
+          console.log(`[live] ${login} est en live (nouveau ou stream changé) → annonce`);
           await announce(stream);
           state[login] = {
             live: true,
@@ -137,10 +148,12 @@ async function poll() {
           };
           changed = true;
         } else if (!prev.live) {
+          console.log(`[live] ${login} repasse en live → mise à jour état`);
           state[login] = { ...prev, live: true };
           changed = true;
         }
       } else if (prev?.live) {
+        console.log(`[live] ${login} n'est plus en live`);
         state[login] = { ...prev, live: false, endedAt: new Date().toISOString() };
         changed = true;
       }
@@ -157,12 +170,12 @@ async function poll() {
 function startLiveAnnouncer(client) {
   clientRef = client;
   if (!CLIENT_ID || !CLIENT_SECRET || !CHANNELS.length) {
-    console.warn('[live] Annonces Twitch désactivées : renseigner TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET et TWITCH_CHANNELS.');
+    console.warn('[live] Annonces Twitch désactivées : renseigner TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET et TWITCH_CHANNELS dans .env.');
     return;
   }
+  console.log(`[live] Surveillance Twitch activée : ${CHANNELS.join(', ')} → salon ${ANNOUNCE_CHANNEL_ID} (rôle ping: ${PING_ROLE_ID || 'aucun'})`);
   setTimeout(poll, INITIAL_DELAY);
   setInterval(poll, POLL_INTERVAL).unref();
-  console.log(`[live] Surveillance Twitch active : ${CHANNELS.join(', ')} (salon ${ANNOUNCE_CHANNEL_ID}).`);
 }
 
 module.exports = { startLiveAnnouncer };
