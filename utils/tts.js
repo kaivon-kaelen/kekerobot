@@ -217,6 +217,7 @@ function getQueue(guildId) {
 module.exports = {
   speak,
   join,
+  connect,
   leave,
   isConnected,
   getQueue,
