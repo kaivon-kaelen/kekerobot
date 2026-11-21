@@ -56,21 +56,18 @@ function ensurePlayer(guild, voiceChannel, state) {
 }
 
 async function getAudioStream(url) {
-  // Récupérer les infos pour trouver le meilleur format audio
-  const info = await ytDlpExec(url, { dumpSingleJson: true, noWarnings: true });
-  const formats = (info.formats || []).filter((f) => f.audioonly && f.acodec !== 'none');
-  formats.sort((a, b) => (b.abr || 0) - (a.abr || 0));
-  const bestAudio = formats[0];
+  // Récupérer les infos (titre)
+  const info = await ytDlpExec(url, { dumpSingleJson: true, noWarnings: true, skipDownload: true });
 
-  // Stream audio directement depuis yt-dlp
-  const stream = ytDlpExec.exec(url, {
-    format: bestAudio.format_id,
+  // Stream audio directement avec le meilleur format audio
+  const process = ytDlpExec.exec(url, {
+    format: 'bestaudio/best',
     output: '-',
     quiet: true,
     noWarnings: true,
   });
 
-  return { stream, title: info.title || 'Titre inconnu' };
+  return { stream: process.stdout, title: info.title || 'Titre inconnu' };
 }
 
 async function playNext(guild, state) {
