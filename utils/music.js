@@ -55,11 +55,13 @@ function ensurePlayer(guild, voiceChannel, state) {
   return state.connection;
 }
 
-async function getAudioStream(url) {
-  // Récupérer les infos (titre)
-  const info = await ytDlpExec(url, { dumpSingleJson: true, noWarnings: true, skipDownload: true });
+async function getAudioInfo(url) {
+  return await ytDlpExec(url, { dumpSingleJson: true, noWarnings: true, skipDownload: true });
+}
 
-  // Stream audio directement avec le meilleur format audio
+async function getAudioStream(url) {
+  const info = await getAudioInfo(url);
+
   const process = ytDlpExec.exec(url, {
     format: 'bestaudio/best',
     output: '-',
@@ -117,6 +119,15 @@ async function playNext(guild, state) {
 async function enqueue(guild, voiceChannel, item) {
   const state = getQueue(guild.id);
   ensurePlayer(guild, voiceChannel, state);
+
+  // Résoudre le titre si c'est un placeholder
+  if (!item.title || item.title === 'Chargement...') {
+    try {
+      const info = await getAudioInfo(item.url);
+      item.title = info.title || item.title;
+    } catch {}
+  }
+
   state.queue.push(item);
   if (!state.playing) {
     await playNext(guild, state);
@@ -166,4 +177,4 @@ function getQueueList(guildId) {
   return { current: state.current, items: [...state.queue] };
 }
 
-module.exports = { enqueue, playNext, skip, stop, pause, resume, getQueueList };
+module.exports = { enqueue, playNext, skip, stop, pause, resume, getQueueList, getAudioStream };

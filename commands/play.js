@@ -32,7 +32,7 @@ module.exports = {
     try {
       const result = await enqueue(interaction.guild, voiceChannel, {
         url,
-        title: 'Chargement...',
+        title: '',
         requestedBy: interaction.user.tag,
       });
 
