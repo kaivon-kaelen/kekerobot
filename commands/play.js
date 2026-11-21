@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const ytdl = require('@distube/ytdl-core');
+const { getInfo } = require('@distube/ytdl-core');
 const { enqueue } = require('../utils/music');
 
 module.exports = {
@@ -32,7 +32,7 @@ module.exports = {
 
     let title = url;
     try {
-      const info = await ytdl.getInfo(url);
+      const info = await getInfo(url);
       title = info.videoDetails.title || url;
     } catch {}
 

@@ -7,7 +7,7 @@ const {
   entersState,
   StreamType,
 } = require('@discordjs/voice');
-const ytdl = require('@distube/ytdl-core');
+const { getInfo, downloadFromInfo } = require('@distube/ytdl-core');
 
 const queues = new Map();
 
@@ -85,7 +85,8 @@ async function playNext(guild, state) {
   }
 
   try {
-    const stream = ytdl(item.url, { filter: 'audioonly', quality: 'highestaudio' });
+    const info = await getInfo(item.url);
+    const stream = downloadFromInfo(info, { quality: 'highestaudio', filter: 'audioonly' });
     const resource = createAudioResource(stream, { inputType: StreamType.Arbitrary });
     state.current = item;
     state.playing = true;
