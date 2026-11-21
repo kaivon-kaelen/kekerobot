@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const { getInfo } = require('@distube/ytdl-core');
 const { enqueue } = require('../utils/music');
 
 module.exports = {
@@ -30,16 +29,10 @@ module.exports = {
 
     await interaction.deferReply();
 
-    let title = url;
-    try {
-      const info = await getInfo(url);
-      title = info.videoDetails.title || url;
-    } catch {}
-
     try {
       const result = await enqueue(interaction.guild, voiceChannel, {
         url,
-        title,
+        title: 'Chargement...',
         requestedBy: interaction.user.tag,
       });
 
