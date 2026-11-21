@@ -162,6 +162,24 @@ module.exports = {
       return;
     }
 
+    // Bouton acceptation règlement
+    if (interaction.isButton() && interaction.customId === 'reglement_accept') {
+      const ROLE_ID = '771347058942672927';
+      const member = interaction.member;
+      if (!member) return interaction.reply({ content: 'Impossible de vérifier votre rôle.', ephemeral: true });
+      if (member.roles.cache.has(ROLE_ID)) {
+        return interaction.reply({ content: 'Vous avez déjà accepté le règlement.', ephemeral: true });
+      }
+      try {
+        await member.roles.add(ROLE_ID);
+        await interaction.reply({ content: '✅ Vous avez accepté le règlement ! Bienvenue sur le serveur.', ephemeral: true });
+      } catch (err) {
+        console.error('[reglement] Erreur ajout rôle :', err?.message);
+        return interaction.reply({ content: '❌ Impossible d\'ajouter le rôle. Contactez un administrateur.', ephemeral: true });
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
     const command = interaction.client.commands.get(interaction.commandName);
