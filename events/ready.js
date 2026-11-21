@@ -1,6 +1,7 @@
 const { Events, ActivityType } = require('discord.js');
 const { announceUpdate } = require('../utils/changelog');
 const { startLiveAnnouncer } = require('../utils/live-announcer');
+const { startVoiceXP } = require('../utils/voice-xp');
 
 module.exports = {
   name: Events.ClientReady,
@@ -32,5 +33,8 @@ module.exports = {
 
     // Surveillance des lives Twitch
     startLiveAnnouncer(client);
+
+    // XP passif en vocal
+    startVoiceXP(client);
   },
 };

@@ -96,6 +96,19 @@ LIVE_POLL_INTERVAL_MS=120000
 
 Crée l'application sur https://dev.twitch.tv/console/apps (OAuth Redirect URL : `http://localhost`). L'état des lives est persisté dans `data/live-state.json`, donc un redémarrage n'annonce pas deux fois le même live. Si les variables Twitch sont absentes, le module se désactive sans rien envoyer.
 
+## XP en vocal
+
+Les membres connectés à un salon vocal gagnent de l'XP passivement, par tranches de temps :
+
+```env
+VOICE_XP_PER_TICK=10        # XP par tranche
+VOICE_XP_TICK_MS=60000      # durée d'une tranche (1 min)
+VOICE_XP_IGNORE_MUTED=true  # pas d'XP si self-mute
+VOICE_XP_IGNORE_DEAFENED=true
+```
+
+Par défaut : **+10 XP par minute** passée en vocal, hors membres mutés/sourds et hors bots. Le timer démarre 1 minute après la connexion du bot, et l'état est persisté dans `data/voice-xp-state.json` (volume `./data`) pour éviter toute attribution en double après un redémarrage.
+
 ## Structure
 
 ```
