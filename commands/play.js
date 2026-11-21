@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const ytdl = require('ytdl-core');
+const ytdl = require('@distube/ytdl-core');
 const { enqueue } = require('../utils/music');
 
 module.exports = {

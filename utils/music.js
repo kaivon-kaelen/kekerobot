@@ -7,7 +7,7 @@ const {
   entersState,
   StreamType,
 } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
+const ytdl = require('@distube/ytdl-core');
 
 const queues = new Map();
 
