@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { addXP } = require('./levels');
+const { EmbedBuilder } = require('discord.js');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const STATE_FILE = path.join(DATA_DIR, 'voice-xp-state.json');
@@ -43,6 +44,28 @@ async function awardTick(client) {
   const state = loadState();
   let changed = false;
 
+  const levelUpChannelId = process.env.LEVEL_UP_CHANNEL_ID || '1398594760427438230';
+
+  async function sendLevelUp(member, newLevel) {
+    let channel = client.channels.cache.get(levelUpChannelId);
+    if (!channel) {
+      try {
+        channel = await client.channels.fetch(levelUpChannelId);
+      } catch {}
+    }
+    if (!channel || !channel.isTextBased()) return;
+    const embed = new EmbedBuilder()
+      .setTitle('🎉 Montée de niveau (vocal) !')
+      .setDescription(`${member} est maintenant **niveau ${newLevel}** !`)
+      .setColor(0x5865f2)
+      .setTimestamp();
+    try {
+      await channel.send({ content: `${member}`, embeds: [embed] });
+    } catch (err) {
+      console.error('[voiceXP] Impossible d\'envoyer l\'annonce :', err?.message);
+    }
+  }
+
   for (const guild of client.guilds.cache.values()) {
     for (const member of guild.members.cache.values()) {
       if (!isEligible(member, state, now)) continue;
@@ -53,6 +76,7 @@ async function awardTick(client) {
         changed = true;
         if (result.newLevel > result.oldLevel) {
           console.log(`[voiceXP] ${member.user.tag} est passé niveau ${result.newLevel} (via vocal)`);
+          await sendLevelUp(member, result.newLevel);
         }
       } catch (err) {
         console.error('[voiceXP] Attribution impossible :', err?.message);
