@@ -1,20 +1,65 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const playdl = require('play-dl');
+const { enqueue } = require('../utils/music');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('play')
-    .setDescription('Lancer GTA VI'),
+    .setDescription('Jouer une vidéo YouTube en vocal')
+    .addStringOption((o) =>
+      o.setName('lien').setDescription('Lien YouTube').setRequired(true),
+    ),
   async execute(interaction) {
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setLabel('Jouer')
-        .setStyle(ButtonStyle.Link)
-        .setURL('https://www.youtube.com/watch?v=dQw4w9WgXcQ'),
-    );
-    const embed = new EmbedBuilder()
-      .setTitle('🎮 GTA VI')
-      .setDescription('Cliquez sur le bouton pour jouer.')
-      .setColor(0x5865f2);
-    await interaction.reply({ embeds: [embed], components: [row] });
+    const url = interaction.options.getString('lien').trim();
+
+    let valid = false;
+    try {
+      valid = await playdl.validate(url);
+    } catch {}
+    if (!valid) {
+      return interaction.reply({
+        content: 'Ce lien n\'est pas une vidéo YouTube valide.',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const voiceChannel = interaction.member?.voice?.channel;
+    if (!voiceChannel) {
+      return interaction.reply({
+        content: 'Tu dois être connecté à un salon vocal pour lancer une musique.',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    await interaction.deferReply();
+
+    let title = url;
+    try {
+      const info = await playdl.video_info(url);
+      title = info.video_details.title || url;
+    } catch {}
+
+    try {
+      const result = await enqueue(interaction.guild, voiceChannel, {
+        url,
+        title,
+        requestedBy: interaction.user.tag,
+      });
+
+      const embed = new EmbedBuilder()
+        .setTitle(result.started ? '🎵 Lecture en cours' : '📝 Ajouté à la file')
+        .setDescription(`**${result.item.title}**`)
+        .addFields(
+          { name: 'Demandé par', value: result.item.requestedBy, inline: true },
+          { name: 'Salon vocal', value: `${voiceChannel}`, inline: true },
+        )
+        .setColor(0x5865f2)
+        .setTimestamp();
+
+      return interaction.editReply({ embeds: [embed] });
+    } catch (err) {
+      console.error('[play]', err?.message);
+      return interaction.editReply('Impossible de lancer la lecture pour le moment.');
+    }
   },
 };

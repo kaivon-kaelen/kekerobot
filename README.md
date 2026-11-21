@@ -109,6 +109,20 @@ VOICE_XP_IGNORE_DEAFENED=true
 
 Par défaut : **+10 XP par minute** passée en vocal, hors membres mutés/sourds et hors bots. Le timer démarre 1 minute après la connexion du bot, et l'état est persisté dans `data/voice-xp-state.json` (volume `./data`) pour éviter toute attribution en double après un redémarrage.
 
+## Musique (version basique)
+
+Le bot peut lire de l'audio YouTube dans un salon vocal avec :
+
+- `/play <lien youtube>` — rejoint ton salon vocal et lance la lecture (ou ajoute à la file)
+- `/skip` — morceau suivant
+- `/stop` — arrête la lecture, vide la file et quitte le vocal
+- `/pause` / `/resume`
+- `/queue` — affiche la file d'attente
+
+Dépendances : `@discordjs/voice`, `play-dl`, `opusscript` et `ffmpeg` (installé dans l'image Docker). Le bot redéploie automatiquement les commandes slash au démarrage, il n'y a rien à faire de plus.
+
+⚠️ Version basique : l'extraction YouTube dépend de `play-dl` et peut se faire bloquer par YouTube. Une version robuste (yt-dlp, reconnexion, file persistante) pourra être ajoutée ensuite.
+
 ## Structure
 
 ```
