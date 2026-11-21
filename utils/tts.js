@@ -9,45 +9,9 @@ const {
 } = require('@discordjs/voice');
 const tts = require('google-tts-api');
 const { Readable } = require('node:stream');
-const fs = require('node:fs');
-const path = require('node:path');
+const { Events } = require('discord.js');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
-const CONFIG_FILE = path.join(DATA_DIR, 'tts-config.json');
-
-function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(CONFIG_FILE)) fs.writeFileSync(CONFIG_FILE, '{}', 'utf8');
-}
-
-function loadConfig() {
-  ensureDir();
-  try { return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); } catch { return {}; }
-}
-
-function saveConfig(config) {
-  ensureDir();
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf8');
-}
-
-function getTextChannel(guildId) {
-  return (loadConfig()[guildId] || {}).textChannelId || null;
-}
-
-function setTextChannel(guildId, channelId) {
-  const config = loadConfig();
-  if (!config[guildId]) config[guildId] = {};
-  config[guildId].textChannelId = channelId;
-  saveConfig(config);
-}
-
-function removeTextChannel(guildId) {
-  const config = loadConfig();
-  if (config[guildId]) delete config[guildId].textChannelId;
-  saveConfig(config);
-}
-
-const states = new Map(); // guildId -> { connection, player, voiceChannelId, textChannelId, queue: [], speaking: false }
+const states = new Map(); // guildId -> { connection, player, voiceChannelId, queue: [], speaking: false }
 
 function getState(guildId) {
   if (!states.has(guildId)) {
@@ -55,7 +19,6 @@ function getState(guildId) {
       connection: null,
       player: null,
       voiceChannelId: null,
-      textChannelId: null,
       queue: [],
       speaking: false,
     });
@@ -63,9 +26,9 @@ function getState(guildId) {
   return states.get(guildId);
 }
 
-async function speak(guild, text, textChannelId) {
+async function speak(guild, text) {
   const state = getState(guild.id);
-  state.queue.push({ text, textChannelId });
+  state.queue.push({ text });
   if (!state.speaking) {
     state.speaking = true;
     await processQueue(guild, state);
@@ -97,7 +60,6 @@ async function processQueue(guild, state) {
     });
     state.player = createAudioPlayer();
     state.player.on(AudioPlayerStatus.Idle, () => {
-      // Continue queue
       setImmediate(() => processQueue(guild, state));
     });
     state.player.on('error', (err) => {
@@ -139,15 +101,12 @@ async function processQueue(guild, state) {
 
   const nodeStream = Readable.fromWeb(response.body);
   const resource = createAudioResource(nodeStream, { inputType: StreamType.Arbitrary });
-
-  state.currentTextChannel = item.textChannelId;
   state.player.play(resource);
 }
 
-async function connect(guild, voiceChannelId, textChannelId) {
+async function connect(guild, voiceChannelId) {
   const state = getState(guild.id);
   state.voiceChannelId = voiceChannelId;
-  if (textChannelId) state.textChannelId = textChannelId;
 
   if (state.connection && state.connection.state.status === VoiceConnectionStatus.Ready) {
     return state;
@@ -186,13 +145,6 @@ async function connect(guild, voiceChannelId, textChannelId) {
   return state;
 }
 
-function join(guild, voiceChannelId, textChannelId) {
-  const state = getState(guild.id);
-  state.voiceChannelId = voiceChannelId;
-  if (textChannelId) state.textChannelId = textChannelId;
-  return state;
-}
-
 async function leave(guildId) {
   const state = getState(guildId);
   if (state.connection) {
@@ -210,19 +162,37 @@ function isConnected(guildId) {
   return Boolean(state.connection && state.connection.state.status === VoiceConnectionStatus.Ready);
 }
 
-function getQueue(guildId) {
-  return getState(guildId).queue;
+function getVoiceChannel(guildId) {
+  return getState(guildId).voiceChannelId;
 }
 
 module.exports = {
   speak,
-  join,
   connect,
   leave,
   isConnected,
-  getQueue,
-  getTextChannel,
-  setTextChannel,
-  removeTextChannel,
-  getState,
+  getVoiceChannel,
 };
+
+// Auto-disconnect when bot is alone in voice channel
+function setupAutoLeave(client) {
+  client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+    const member = newState.member || oldState.member;
+    if (!member || member.user.bot) return;
+
+    const state = getState(member.guild.id);
+    if (!state.voiceChannelId) return;
+
+    const vc = member.guild.channels.cache.get(state.voiceChannelId);
+    if (!vc || !vc.isVoiceBased()) return;
+
+    // Count non-bot members in the voice channel
+    const humans = vc.members.filter((m) => !m.user.bot);
+    if (humans.size === 0 && isConnected(member.guild.id)) {
+      console.log('[TTS] Plus personne dans le vocal, déconnexion.');
+      await leave(member.guild.id);
+    }
+  });
+}
+
+module.exports.setupAutoLeave = setupAutoLeave;

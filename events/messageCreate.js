@@ -2,7 +2,7 @@ const { ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle 
 const { getOpenByUser, getOpenByThread, createTicket } = require('../utils/modmail');
 const pending = require('../utils/modmail-pending');
 const { addMapping } = require('../utils/modmail-messages');
-const { speak, getTextChannel } = require('../utils/tts');
+const { speak, isConnected } = require('../utils/tts');
 
 const FORUM_ID = process.env.MODMAIL_FORUM_CHANNEL_ID;
 
@@ -20,13 +20,12 @@ module.exports = {
   async execute(message) {
     if (message.author.bot) return;
 
-    // TTS : lire les messages du salon texte configuré
+    // TTS : lire automatiquement tous les messages texte du serveur quand le bot est en vocal
     if (message.guild && message.channel.type === ChannelType.GuildText) {
-      const ttsChannel = getTextChannel(message.guild.id);
-      if (ttsChannel && message.channel.id === ttsChannel) {
+      if (isConnected(message.guild.id)) {
         const content = message.content.trim();
         if (content) {
-          await speak(message.guild, content, message.channel.id).catch(() => {});
+          await speak(message.guild, content).catch(() => {});
         }
       }
     }

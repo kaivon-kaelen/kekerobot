@@ -13,7 +13,7 @@ module.exports = {
     }
 
     const text = interaction.options.getString('message');
-    await speak(interaction.guild, text, interaction.channelId);
+    await speak(interaction.guild, text);
     await interaction.reply({ content: '🔊 Message ajouté à la file TTS.', flags: MessageFlags.Ephemeral });
   },
 };
