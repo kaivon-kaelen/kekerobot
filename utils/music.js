@@ -8,8 +8,14 @@ const {
   StreamType,
 } = require('@discordjs/voice');
 const ytDlpExec = require('yt-dlp-exec');
+const { sendLog, modLogEmbed } = require('./logger');
 
 const queues = new Map();
+let client = null;
+
+function setClient(c) {
+  client = c;
+}
 
 function getQueue(guildId) {
   if (!queues.has(guildId)) {
@@ -107,6 +113,21 @@ async function playNext(guild, state) {
     state.current = { ...item, title };
     state.playing = true;
     state.player.play(resource);
+
+    if (client) {
+      const g = client.guilds.cache.get(guild.id);
+      const ch = g?.channels.cache.get(state.channelId);
+      await sendLog(client, modLogEmbed({
+        title: '🎵 Musique lancée',
+        color: 0x5865f2,
+        fields: [
+          { name: 'Titre', value: item.title, inline: true },
+          { name: 'Salon vocal', value: ch ? ch.name : 'Inconnu', inline: true },
+          { name: 'Demandé par', value: item.requestedBy || 'Inconnu', inline: true },
+        ],
+      }));
+    }
+
     return state.current;
   } catch (err) {
     console.error('[music] Impossible de lire le morceau :', err?.message);
@@ -177,4 +198,4 @@ function getQueueList(guildId) {
   return { current: state.current, items: [...state.queue] };
 }
 
-module.exports = { enqueue, playNext, skip, stop, pause, resume, getQueueList, getAudioStream };
+module.exports = { enqueue, playNext, skip, stop, pause, resume, getQueueList, getAudioStream, setClient };

@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { enqueue } = require('../utils/music');
+const { sendLog, modLogEmbed } = require('../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -46,7 +47,19 @@ module.exports = {
         .setColor(0x5865f2)
         .setTimestamp();
 
-      return interaction.editReply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
+
+      await sendLog(interaction.client, modLogEmbed({
+        title: result.started ? '🎵 Musique lancée' : '📝 Musique ajoutée',
+        color: 0x5865f2,
+        fields: [
+          { name: 'Titre', value: result.item.title, inline: true },
+          { name: 'Demandé par', value: result.item.requestedBy, inline: true },
+          { name: 'Salon vocal', value: `${voiceChannel}`, inline: true },
+        ],
+      }));
+
+      return;
     } catch (err) {
       console.error('[play]', err?.message);
       return interaction.editReply('Impossible de lancer la lecture pour le moment.');

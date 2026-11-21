@@ -23,6 +23,8 @@ const client = new Client({
 });
 
 // Évite qu'une erreur non gérée (ex. interaction expirée) fasse tomber le processus
+require('./utils/music').setClient(client);
+
 client.on('error', (error) => {
   console.error('[client] Erreur non gérée :', error?.message || error);
 });
