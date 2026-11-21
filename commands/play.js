@@ -12,7 +12,8 @@ module.exports = {
   async execute(interaction) {
     const url = interaction.options.getString('lien').trim();
 
-    if (!ytdl.validateURL(url)) {
+    const ytRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(\S*)?$/;
+    if (!ytRegex.test(url)) {
       return interaction.reply({
         content: 'Ce lien n\'est pas une vidéo YouTube valide.',
         flags: MessageFlags.Ephemeral,
