@@ -144,6 +144,48 @@ async function processQueue(guild, state) {
   state.player.play(resource);
 }
 
+async function connect(guild, voiceChannelId, textChannelId) {
+  const state = getState(guild.id);
+  state.voiceChannelId = voiceChannelId;
+  if (textChannelId) state.textChannelId = textChannelId;
+
+  if (state.connection && state.connection.state.status === VoiceConnectionStatus.Ready) {
+    return state;
+  }
+
+  const vc = guild.channels.cache.get(voiceChannelId);
+  if (!vc || !vc.isVoiceBased()) {
+    throw new Error('Salon vocal introuvable');
+  }
+
+  state.connection = joinVoiceChannel({
+    channelId: vc.id,
+    guildId: guild.id,
+    adapterCreator: guild.voiceAdapterCreator,
+    selfDeaf: false,
+    selfMute: false,
+  });
+  state.player = createAudioPlayer();
+  state.player.on(AudioPlayerStatus.Idle, () => {
+    setImmediate(() => processQueue(guild, state));
+  });
+  state.player.on('error', (err) => {
+    console.error('[TTS] Erreur joueur audio :', err?.message);
+    state.player.stop();
+    setImmediate(() => processQueue(guild, state));
+  });
+  state.connection.subscribe(state.player);
+
+  try {
+    await entersState(state.connection, VoiceConnectionStatus.Ready, 15000);
+  } catch (err) {
+    console.error('[TTS] Connexion vocale impossible :', err?.message);
+    throw err;
+  }
+
+  return state;
+}
+
 function join(guild, voiceChannelId, textChannelId) {
   const state = getState(guild.id);
   state.voiceChannelId = voiceChannelId;

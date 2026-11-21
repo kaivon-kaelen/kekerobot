@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { join, isConnected, setTextChannel } = require('../utils/tts');
+const { connect, isConnected, setTextChannel } = require('../utils/tts');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -20,9 +20,15 @@ module.exports = {
       return interaction.reply({ content: 'Le bot est déjà connecté à un salon vocal.', flags: MessageFlags.Ephemeral });
     }
 
-    join(interaction.guild, voiceChannel.id, textChannel ? textChannel.id : null);
-    if (textChannel) setTextChannel(interaction.guild.id, textChannel.id);
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    await interaction.reply({ content: `🔊 Connecté à ${voiceChannel}.` + (textChannel ? ` Salon texte : ${textChannel}.` : ''), flags: MessageFlags.Ephemeral });
+    try {
+      await connect(interaction.guild, voiceChannel.id, textChannel ? textChannel.id : null);
+      if (textChannel) setTextChannel(interaction.guild.id, textChannel.id);
+      await interaction.editReply({ content: `🔊 Connecté à ${voiceChannel}.` + (textChannel ? ` Salon texte : ${textChannel}.` : '') });
+    } catch (err) {
+      console.error('[join] Erreur connexion :', err?.message);
+      await interaction.editReply({ content: '❌ Impossible de se connecter au salon vocal.' });
+    }
   },
 };
