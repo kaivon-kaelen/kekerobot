@@ -5,8 +5,9 @@ const {
   AudioPlayerStatus,
   VoiceConnectionStatus,
   entersState,
+  StreamType,
 } = require('@discordjs/voice');
-const playdl = require('play-dl');
+const ytdl = require('ytdl-core');
 
 const queues = new Map();
 
@@ -84,8 +85,8 @@ async function playNext(guild, state) {
   }
 
   try {
-    const stream = await playdl.stream(item.url);
-    const resource = createAudioResource(stream.stream, { inputType: stream.type });
+    const stream = ytdl(item.url, { filter: 'audioonly', quality: 'highestaudio' });
+    const resource = createAudioResource(stream, { inputType: StreamType.Arbitrary });
     state.current = item;
     state.playing = true;
     state.player.play(resource);
@@ -93,7 +94,6 @@ async function playNext(guild, state) {
   } catch (err) {
     console.error('[music] Impossible de lire le morceau :', err?.message);
     state.playing = false;
-    // On passe au suivant pour ne pas bloquer la file sur un lien invalide
     if (state.queue.length) return playNext(guild, state);
     return null;
   }

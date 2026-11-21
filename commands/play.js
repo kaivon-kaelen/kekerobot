@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
-const playdl = require('play-dl');
+const ytdl = require('ytdl-core');
 const { enqueue } = require('../utils/music');
 
 module.exports = {
@@ -12,11 +12,7 @@ module.exports = {
   async execute(interaction) {
     const url = interaction.options.getString('lien').trim();
 
-    let valid = false;
-    try {
-      valid = await playdl.validate(url);
-    } catch {}
-    if (!valid) {
+    if (!ytdl.validateURL(url)) {
       return interaction.reply({
         content: 'Ce lien n\'est pas une vidéo YouTube valide.',
         flags: MessageFlags.Ephemeral,
@@ -35,8 +31,8 @@ module.exports = {
 
     let title = url;
     try {
-      const info = await playdl.video_info(url);
-      title = info.video_details.title || url;
+      const info = await ytdl.getInfo(url);
+      title = info.videoDetails.title || url;
     } catch {}
 
     try {
